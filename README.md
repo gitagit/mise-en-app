@@ -1,6 +1,11 @@
-# Kitchen Manager (Next.js + SQLite + Prisma)
+# Kitchen Manager
 
-A personal kitchen management app for tracking inventory, finding recipes based on what you have, planning grocery runs, and growing your cooking skills over time.
+A kitchen management app for tracking inventory, finding recipes based on what you have,
+planning grocery runs, and growing your cooking skills over time.
+
+**Live:** [mise-en-app.vercel.app](https://mise-en-app.vercel.app) &nbsp;| &nbsp;**Stack:** Next.js 15 - TypeScript - Prisma - PostgreSQL - NextAuth - Claude API
+
+<!-- SCREENSHOT -->
 
 ## Features
 
@@ -16,14 +21,17 @@ A personal kitchen management app for tracking inventory, finding recipes based 
 # 1. Install dependencies
 npm install
 
-# 2. Initialize database
+# 2. Configure environment (requires a PostgreSQL database)
+cp .env.example .env   # then fill in DATABASE_URL, DIRECT_URL, NEXTAUTH_SECRET
+
+# 3. Initialize database
 npx prisma migrate dev --name init
 npx prisma generate
 
-# 3. (Optional) Seed with example data
+# 4. (Optional) Seed with example data
 npm run db:seed
 
-# 4. Run dev server
+# 5. Run dev server
 npm run dev
 ```
 
@@ -74,7 +82,9 @@ The `/api/suggest` endpoint scores recipes based on:
 
 ## Deployment
 
-Production runs on **Vercel** under the project name **`mise-en-place`** (`kitchen-mgmt.vercel.app`).
+Production runs on **Vercel** at [mise-en-app.vercel.app](https://mise-en-app.vercel.app).
+The Vercel project is named `mise-en-place` for historical reasons; the production
+domain is `mise-en-app.vercel.app`.
 
 To link the Vercel CLI to the correct project after a fresh clone:
 
@@ -91,7 +101,7 @@ Required Vercel environment variables (set under project Settings → Environmen
 | `DATABASE_URL` | Neon PostgreSQL pooled connection string |
 | `DIRECT_URL` | Neon PostgreSQL direct connection string (required by Prisma) |
 | `NEXTAUTH_SECRET` | 32-byte base64 secret (`node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`) |
-| `NEXTAUTH_URL` | Production base URL (e.g. `https://kitchen-mgmt.vercel.app`) |
+| `NEXTAUTH_URL` | Production base URL (e.g. `https://mise-en-app.vercel.app`) |
 | `ANTHROPIC_API_KEY` | For AI generate / inventory scan features |
 | `NEXT_PUBLIC_BASE_URL` | Same as `NEXTAUTH_URL` |
 
