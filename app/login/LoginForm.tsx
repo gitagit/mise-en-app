@@ -5,6 +5,18 @@ import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
+/** Where to go after sign-in: a same-origin path only, so the query string cannot redirect off-site. */
+function safeReturnPath(raw: string | null): string {
+  if (!raw) return "/";
+  try {
+    const url = new URL(raw, window.location.origin);
+    if (url.origin !== window.location.origin) return "/";
+    return url.pathname + url.search + url.hash;
+  } catch {
+    return "/";
+  }
+}
+
 export default function LoginForm({ hasGoogle, hasGithub }: { hasGoogle: boolean; hasGithub: boolean }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,7 +29,7 @@ export default function LoginForm({ hasGoogle, hasGithub }: { hasGoogle: boolean
     e.preventDefault();
     setLoading(true);
     setError("");
-    const from = searchParams.get("from") || "/";
+    const from = safeReturnPath(searchParams.get("callbackUrl") ?? searchParams.get("from"));
     const result = await signIn("credentials", {
       email,
       password,
@@ -27,8 +39,10 @@ export default function LoginForm({ hasGoogle, hasGithub }: { hasGoogle: boolean
     if (result?.error) {
       setError("Incorrect email or password");
     } else {
-      router.push(from);
-      router.refresh();
+      // Full navigation, not router.push: the nav links were prefetched while signed out,
+      // so the client router cache holds "redirect to /login" for them and would bounce
+      // a freshly signed-in user straight back here.
+      window.location.assign(from);
     }
   }
 
