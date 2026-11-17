@@ -1,35 +1,18 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 
-// Extract utility functions to test (we'll need to refactor these out of the component)
-// For now, let's replicate and test them
-
-type ExpirationStatus = "expired" | "expiring-soon" | "ok" | "none";
-
-function getExpirationStatus(expiresOn: string | null): ExpirationStatus {
-  if (!expiresOn) return "none";
-  const now = new Date();
-  const exp = new Date(expiresOn);
-  const daysUntil = Math.ceil((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-
-  if (daysUntil < 0) return "expired";
-  if (daysUntil <= 7) return "expiring-soon";
-  return "ok";
-}
-
-function formatExpiration(expiresOn: string | null): string {
-  if (!expiresOn) return "";
-  const now = new Date();
-  const exp = new Date(expiresOn);
-  const daysUntil = Math.ceil((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-
-  if (daysUntil < 0) return `expired ${Math.abs(daysUntil)}d ago`;
-  if (daysUntil === 0) return "expires today";
-  if (daysUntil === 1) return "expires tomorrow";
-  if (daysUntil <= 7) return `expires in ${daysUntil}d`;
-  return `exp ${exp.toLocaleDateString()}`;
-}
+import { getExpirationStatus, formatExpiration } from "@/lib/format";
 
 describe('Expiration Utils', () => {
+  // Day counts are rounded up from the current time, so pin the clock: without this the
+  // "tomorrow" cases pass or fail depending on the hour the suite runs.
+  beforeAll(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 5, 15, 12, 0, 0));
+  });
+  afterAll(() => {
+    vi.useRealTimers();
+  });
+
   describe('getExpirationStatus', () => {
     it('returns "none" for null expiration', () => {
       expect(getExpirationStatus(null)).toBe("none");

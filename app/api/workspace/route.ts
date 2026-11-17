@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
-import { getAuthContext } from "@/lib/mobile-auth";
+import { getAuthContext, getAuthUser } from "@/lib/mobile-auth";
 import { z } from "zod";
 
 // GET: return current workspace info + members
@@ -24,7 +24,7 @@ export async function GET(req: Request) {
 
 // POST: create a new workspace and make the caller the OWNER
 export async function POST(req: Request) {
-  const auth = await getAuthContext(req);
+  const auth = await getAuthUser(req);
   if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   // Block if user already has a workspace

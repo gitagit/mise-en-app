@@ -1,11 +1,11 @@
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
-import { getAuthContext } from "@/lib/mobile-auth";
+import { getAuthUser } from "@/lib/mobile-auth";
 import { z } from "zod";
 
 // POST: join a workspace via invite code
 export async function POST(req: Request) {
-  const auth = await getAuthContext(req);
+  const auth = await getAuthUser(req);
   if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   if (auth.workspaceId) {

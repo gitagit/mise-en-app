@@ -1,5 +1,6 @@
 "use client";
 
+import { formatCost, scaleQuantity } from "@/lib/format";
 import { useEffect, useMemo, useState } from "react";
 import { ConfirmModal, Toast } from "@/app/components/Modal";
 import Modal from "@/app/components/Modal";
@@ -222,58 +223,12 @@ export default function RecipesClient({ initialSearch }: RecipesClientProps) {
     }
   }
 
-  function formatCost(cents: number | null | undefined): string {
-    if (cents == null) return "—";
-    return `$${(cents / 100).toFixed(2)}`;
-  }
-
   function getScaledServings(r: Recipe): number {
     return scaledServings[r.id] ?? r.servings;
   }
 
   function setRecipeServings(recipeId: string, servings: number) {
     setScaledServings(prev => ({ ...prev, [recipeId]: servings }));
-  }
-
-  // Scale a quantity string by a ratio (e.g., "2 cups" with ratio 1.5 -> "3 cups")
-  function scaleQuantity(quantityText: string | null, ratio: number): string | null {
-    if (!quantityText || ratio === 1) return quantityText;
-
-    // Match leading number (including fractions like 1/2, decimals like 1.5)
-    const match = quantityText.match(/^(\d+(?:\/\d+)?(?:\.\d+)?)\s*(.*)$/);
-    if (!match) return quantityText;
-
-    let num: number;
-    const numStr = match[1];
-    const rest = match[2];
-
-    // Handle fractions like "1/2"
-    if (numStr.includes("/")) {
-      const [numer, denom] = numStr.split("/").map(Number);
-      num = numer / denom;
-    } else {
-      num = parseFloat(numStr);
-    }
-
-    const scaled = num * ratio;
-
-    // Format nicely: avoid too many decimals
-    let formatted: string;
-    if (scaled === Math.floor(scaled)) {
-      formatted = scaled.toString();
-    } else if (scaled * 4 === Math.floor(scaled * 4)) {
-      // Can express as quarter fraction
-      const whole = Math.floor(scaled);
-      const frac = scaled - whole;
-      if (frac === 0.25) formatted = whole ? `${whole} 1/4` : "1/4";
-      else if (frac === 0.5) formatted = whole ? `${whole} 1/2` : "1/2";
-      else if (frac === 0.75) formatted = whole ? `${whole} 3/4` : "3/4";
-      else formatted = scaled.toFixed(2).replace(/\.?0+$/, "");
-    } else {
-      formatted = scaled.toFixed(2).replace(/\.?0+$/, "");
-    }
-
-    return rest ? `${formatted} ${rest}` : formatted;
   }
 
   async function refresh() {

@@ -1,5 +1,6 @@
 "use client";
 
+import { formatCost, formatExpiration, getExpirationStatus, type ExpirationStatus } from "@/lib/format";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Modal, { ConfirmModal, Toast } from "@/app/components/Modal";
 
@@ -25,24 +26,6 @@ type ScannedItem = {
 
 const categories = ["PANTRY","SPICE","SEAFOOD","PRODUCE","MEAT","DAIRY","CONDIMENT","BAKING","BEVERAGE","PREPARED","OTHER"];
 const locations = ["PANTRY","FRIDGE","FREEZER","COUNTER","OTHER"];
-
-function formatCost(cents: number | null | undefined): string {
-  if (cents == null) return "—";
-  return `$${(cents / 100).toFixed(2)}`;
-}
-
-type ExpirationStatus = "expired" | "expiring-soon" | "ok" | "none";
-
-function getExpirationStatus(expiresOn: string | null): ExpirationStatus {
-  if (!expiresOn) return "none";
-  const now = new Date();
-  const exp = new Date(expiresOn);
-  const daysUntil = Math.ceil((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-
-  if (daysUntil < 0) return "expired";
-  if (daysUntil <= 7) return "expiring-soon";
-  return "ok";
-}
 
 function getExpirationStyle(status: ExpirationStatus): React.CSSProperties {
   switch (status) {
@@ -77,19 +60,6 @@ function isStale(lastConfirmed: string | null, category?: string, location?: str
   if (!lastConfirmed) return false; // newly added = not yet stale
   const diffMs = Date.now() - new Date(lastConfirmed).getTime();
   return diffMs > days * 24 * 60 * 60 * 1000;
-}
-
-function formatExpiration(expiresOn: string | null): string {
-  if (!expiresOn) return "";
-  const now = new Date();
-  const exp = new Date(expiresOn);
-  const daysUntil = Math.ceil((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-
-  if (daysUntil < 0) return `expired ${Math.abs(daysUntil)}d ago`;
-  if (daysUntil === 0) return "expires today";
-  if (daysUntil === 1) return "expires tomorrow";
-  if (daysUntil <= 7) return `expires in ${daysUntil}d`;
-  return `exp ${exp.toLocaleDateString()}`;
 }
 
 export default function InventoryClient() {

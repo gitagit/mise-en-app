@@ -1,51 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-// Cost formatting function
-function formatCost(cents: number | null | undefined): string {
-  if (cents == null) return "—";
-  return `$${(cents / 100).toFixed(2)}`;
-}
-
-// Quantity scaling function from recipes
-function scaleQuantity(quantityText: string | null, ratio: number): string | null {
-  if (!quantityText || ratio === 1) return quantityText;
-
-  // Match leading number (including fractions like 1/2, decimals like 1.5)
-  const match = quantityText.match(/^(\d+(?:\/\d+)?(?:\.\d+)?)\s*(.*)$/);
-  if (!match) return quantityText;
-
-  let num: number;
-  const numStr = match[1];
-  const rest = match[2];
-
-  // Handle fractions like "1/2"
-  if (numStr.includes("/")) {
-    const [numer, denom] = numStr.split("/").map(Number);
-    num = numer / denom;
-  } else {
-    num = parseFloat(numStr);
-  }
-
-  const scaled = num * ratio;
-
-  // Format nicely: avoid too many decimals
-  let formatted: string;
-  if (scaled === Math.floor(scaled)) {
-    formatted = scaled.toString();
-  } else if (scaled * 4 === Math.floor(scaled * 4)) {
-    // Can express as quarter fraction
-    const whole = Math.floor(scaled);
-    const frac = scaled - whole;
-    if (frac === 0.25) formatted = whole ? `${whole} 1/4` : "1/4";
-    else if (frac === 0.5) formatted = whole ? `${whole} 1/2` : "1/2";
-    else if (frac === 0.75) formatted = whole ? `${whole} 3/4` : "3/4";
-    else formatted = scaled.toFixed(2).replace(/\.?0+$/, "");
-  } else {
-    formatted = scaled.toFixed(2).replace(/\.?0+$/, "");
-  }
-
-  return rest ? `${formatted} ${rest}` : formatted;
-}
+import { formatCost, scaleQuantity } from "@/lib/format";
 
 describe('Cost Formatting', () => {
   describe('formatCost', () => {
