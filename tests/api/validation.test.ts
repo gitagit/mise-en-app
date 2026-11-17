@@ -1,29 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { z } from 'zod';
-
-// Recreate schemas for testing (in real app, these would be imported from _shared.ts)
-const ItemCategories = ["PANTRY", "SPICE", "SEAFOOD", "PRODUCE", "MEAT", "DAIRY", "CONDIMENT", "BAKING", "BEVERAGE", "PREPARED", "OTHER"] as const;
-const ItemLocations = ["PANTRY", "FRIDGE", "FREEZER", "COUNTER", "OTHER"] as const;
-
-const ItemCategorySchema = z.enum(ItemCategories);
-const ItemLocationSchema = z.enum(ItemLocations);
-
-const CreateItemSchema = z.object({
-  name: z.string().min(1),
-  category: ItemCategorySchema,
-  location: ItemLocationSchema,
-  staple: z.boolean().optional(),
-  parLevel: z.number().int().positive().optional(),
-  defaultCostCents: z.number().int().nonnegative().optional()
-});
-
-const CreateBatchSchema = z.object({
-  itemId: z.string().min(1),
-  quantityText: z.string().min(1),
-  expiresOn: z.string().datetime().optional(),
-  purchasedOn: z.string().datetime().optional(),
-  costCents: z.number().int().nonnegative().optional()
-});
+import {
+  CreateItemSchema, CreateBatchSchema, ItemCategorySchema, ItemLocationSchema,
+  RecipeSchema, MealPlanSchema,
+} from "@/app/api/_shared";
 
 describe('Item Schema Validation', () => {
   describe('CreateItemSchema', () => {
@@ -160,31 +139,6 @@ describe('Item Schema Validation', () => {
   });
 });
 
-// Recipe validation
-const RecipeSourceSchema = z.enum(["PERSONAL", "FAMILY", "WEB", "COOKBOOK", "FRIEND"]);
-const ComplexitySchema = z.enum(["FAMILIAR", "STRETCH", "CHALLENGE"]);
-
-const RecipeIngredientSchema = z.object({
-  name: z.string().min(1),
-  required: z.boolean().optional(),
-  quantityText: z.string().optional(),
-  preparation: z.string().optional(),
-  substitutions: z.array(z.string()).optional()
-});
-
-const RecipeSchema = z.object({
-  title: z.string().min(1),
-  servings: z.number().int().positive().optional(),
-  handsOnMin: z.number().int().positive().optional(),
-  totalMin: z.number().int().positive().optional(),
-  difficulty: z.number().int().min(1).max(5).optional(),
-  instructions: z.string().min(1),
-  ingredients: z.array(RecipeIngredientSchema).min(1),
-  source: RecipeSourceSchema.optional(),
-  cuisine: z.string().optional(),
-  complexity: ComplexitySchema.optional()
-});
-
 describe('Recipe Schema Validation', () => {
   it('accepts minimal valid recipe', () => {
     const result = RecipeSchema.safeParse({
@@ -252,15 +206,6 @@ describe('Recipe Schema Validation', () => {
     });
     expect(result.success).toBe(false);
   });
-});
-
-// Meal plan validation
-const MealPlanSchema = z.object({
-  date: z.string(),
-  slot: z.enum(["breakfast", "lunch", "dinner"]),
-  recipeId: z.string().optional(),
-  notes: z.string().optional(),
-  servings: z.number().int().positive().optional()
 });
 
 describe('MealPlan Schema Validation', () => {

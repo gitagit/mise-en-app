@@ -1,15 +1,8 @@
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import { getAuthContext } from "@/lib/mobile-auth";
+import { MealPlanSchema } from "@/app/api/_shared";
 
-const MealPlanSchema = z.object({
-  date: z.string(), // ISO date string
-  slot: z.enum(["breakfast", "lunch", "dinner"]),
-  recipeId: z.string().optional(),
-  notes: z.string().optional(),
-  servings: z.number().int().positive().optional()
-});
 
 export async function GET(req: Request) {
   const auth = await getAuthContext(req);

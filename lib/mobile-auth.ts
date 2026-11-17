@@ -52,3 +52,24 @@ export async function getAuthContext(req: Request): Promise<AuthContext | null> 
 
   return null;
 }
+
+export type AuthUser = { userId: string; workspaceId: string | null };
+
+/**
+ * Auth for the workspace setup routes, where the caller is signed in but may not
+ * belong to a workspace yet. getAuthContext() requires a workspace, so a newly
+ * registered user was rejected with 401 when trying to create or join one.
+ */
+export async function getAuthUser(req: Request): Promise<AuthUser | null> {
+  const session = await getServerSession(authOptions);
+  if (session?.user?.id) {
+    return { userId: session.user.id, workspaceId: session.user.workspaceId ?? null };
+  }
+
+  const authHeader = req.headers.get("authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    return verifyMobileToken(authHeader.slice(7));
+  }
+
+  return null;
+}

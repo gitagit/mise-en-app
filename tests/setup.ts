@@ -20,30 +20,33 @@ vi.mock('next/link', () => ({
     React.createElement('a', { href }, children),
 }));
 
-// Mock window.scrollTo
-Object.defineProperty(window, 'scrollTo', {
-  value: vi.fn(),
-  writable: true,
-});
+// Browser-only mocks; API route tests run in the node environment and skip these.
+if (typeof window !== 'undefined') {
+  // Mock window.scrollTo
+  Object.defineProperty(window, 'scrollTo', {
+    value: vi.fn(),
+    writable: true,
+  });
 
-// Mock clipboard API
-Object.defineProperty(navigator, 'clipboard', {
-  value: {
-    writeText: vi.fn().mockResolvedValue(undefined),
-    readText: vi.fn().mockResolvedValue(''),
-  },
-  writable: true,
-});
+  // Mock clipboard API
+  Object.defineProperty(navigator, 'clipboard', {
+    value: {
+      writeText: vi.fn().mockResolvedValue(undefined),
+      readText: vi.fn().mockResolvedValue(''),
+    },
+    writable: true,
+  });
 
-// Mock confirm dialog
-window.confirm = vi.fn(() => true);
+  // Mock confirm dialog
+  window.confirm = vi.fn(() => true);
 
-// Mock alert
-window.alert = vi.fn();
+  // Mock alert
+  window.alert = vi.fn();
 
-// Mock HTMLDialogElement
-HTMLDialogElement.prototype.showModal = vi.fn();
-HTMLDialogElement.prototype.close = vi.fn();
+  // Mock HTMLDialogElement
+  HTMLDialogElement.prototype.showModal = vi.fn();
+  HTMLDialogElement.prototype.close = vi.fn();
+}
 
 // Reset mocks between tests
 beforeEach(() => {
