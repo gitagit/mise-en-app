@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 /** Where to go after sign-in: a same-origin path only, so the query string cannot redirect off-site. */
@@ -22,7 +22,6 @@ export default function LoginForm({ hasGoogle, hasGithub }: { hasGoogle: boolean
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   async function handleSubmit(e: React.FormEvent) {
